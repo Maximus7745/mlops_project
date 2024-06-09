@@ -1,0 +1,114 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE = "Maximus/mlops_project"
+        DOCKER_REGISTRY_CREDENTIALS_ID = 'dockerhub-credentials'
+        DOCKER_BUILDKIT = "1" // Включаем BuildKit
+    }
+
+    
+    stages {
+        stage('git') {
+            steps {
+                script {
+                    try {
+                        git branch: 'main', url: 'https://github.com/Maximus7745/mlops_project'
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        error "Ошибка при выполнении git: ${e.message}"
+                    }
+                }
+            }
+        }
+        stage('create_venv') {
+            steps {
+                script {
+                    try {
+                        sh 'python3 -m venv myenv'
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        error "Ошибка при создании виртуальной среды: ${e.message}"
+                    }
+                }
+            }
+        }
+        stage('install_requirements') {
+            steps {
+                script {
+                    try {
+                        sh 'source myenv/bin/activate && pip install -r requirements.txt && deactivate'
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        error "Ошибка при установке зависимостей: ${e.message}"
+                    }
+                }
+            }
+        }
+        stage('data_load') {
+            steps {
+                script {
+                    try {
+                        sh 'source myenv/bin/activate && python data_creation.py && deactivate'
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        error "Ошибка при выполнении data_creation.py: ${e.message}"
+                    }
+                }
+            }
+        }
+        stage('data_preprocess') {
+            steps {
+                script {
+                    try {
+                        sh 'source myenv/bin/activate && python model_preprocessing.py && deactivate'
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        error "Ошибка при выполнении model_preprocessing.py: ${e.message}"
+                    }
+                }
+            }
+        }
+        stage('train') {
+            steps {
+                script {
+                    try {
+                        sh 'source myenv/bin/activate && python model_preparation.py && deactivate'
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        error "Ошибка при выполнении model_preparation.py: ${e.message}"
+                    }
+                }
+            }
+        }
+        stage('test') {
+            steps {
+                script {
+                    try {
+                        sh 'source myenv/bin/activate && python model_testing.py && deactivate'
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        error "Ошибка при выполнении model_testing.py: ${e.message}"
+                    }
+                }
+            }
+        }
+        stage('unit_tests') {
+            steps {
+                script {
+                    try {
+                        sh 'source myenv/bin/activate && pytest test_fastapi_app.py && deactivate'
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        error "Ошибка при выполнении модульных тестов: ${e.message}"
+                    }
+                }
+            }
+        }
+        stage('data_quality_tests') {
+            steps {
+                script {
+                    try {
+                        sh 'source myenv/bin/activate && pytest test_data_quality.py && deactivate'
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
