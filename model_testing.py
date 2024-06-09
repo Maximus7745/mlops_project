@@ -14,14 +14,19 @@ dataset = load_dataset("dair-ai/emotion")
 
 
 def preprocess_data(examples):
-    return tokenizer(examples['text'], truncation=True, padding=True)
+    return tokenizer(examples["text"], truncation=True, padding=True)
+
 
 encoded_test_dataset = dataset["test"].map(preprocess_data, batched=True)
 encoded_test_dataset = encoded_test_dataset.rename_column("label", "labels")
-encoded_test_dataset.set_format("torch", columns=["input_ids", "attention_mask", "labels"])
+encoded_test_dataset.set_format(
+    "torch", columns=["input_ids", "attention_mask", "labels"]
+)
 
 
-test_dataloader = DataLoader(encoded_test_dataset, batch_size=4, collate_fn=DataCollatorWithPadding(tokenizer))
+test_dataloader = DataLoader(
+    encoded_test_dataset, batch_size=4, collate_fn=DataCollatorWithPadding(tokenizer)
+)
 
 
 model.eval()
@@ -47,8 +52,10 @@ with torch.no_grad():
 from sklearn.metrics import accuracy_score, f1_score, classification_report
 
 accuracy = accuracy_score(all_labels, all_preds)
-f1 = f1_score(all_labels, all_preds, average='weighted')
-report = classification_report(all_labels, all_preds, target_names=dataset["train"].features["label"].names)
+f1 = f1_score(all_labels, all_preds, average="weighted")
+report = classification_report(
+    all_labels, all_preds, target_names=dataset["train"].features["label"].names
+)
 
 print(f"Accuracy: {accuracy}")
 print(f"F1 Score: {f1}")

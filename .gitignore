@@ -1,1 +1,7 @@
 /emotion_dataset
+__pycache__/
+encoded_train_dataset/
+encoded_val_dataset/
+fine-tuned-emotion-model/
+venv/
+.pytest_cache
