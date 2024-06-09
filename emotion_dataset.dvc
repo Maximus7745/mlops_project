@@ -1,0 +1,6 @@
+outs:
+- md5: da499073186a4d27f195289563d37491.dir
+  size: 3217297
+  nfiles: 16
+  hash: md5
+  path: emotion_dataset
